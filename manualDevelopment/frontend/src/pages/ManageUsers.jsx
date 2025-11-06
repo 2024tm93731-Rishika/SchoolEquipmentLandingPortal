@@ -258,14 +258,14 @@ const ManageUsers = () => {
         {/* Success Message */}
         {successMessage && (
           <div className="alert alert-success">
-            ✓ {successMessage}
+             {successMessage}
           </div>
         )}
 
         {/* Error Message */}
         {error && !showModal && (
           <div className="alert alert-error">
-            ✗ {error}
+             {error}
           </div>
         )}
 
@@ -347,7 +347,7 @@ const ManageUsers = () => {
                           onClick={() => handleEditUser(userItem)}
                           title="Edit User"
                         >
-                          ✏️ Edit
+                           Edit
                         </button>
                         <button 
                           className="btn-delete"
@@ -355,7 +355,7 @@ const ManageUsers = () => {
                           title="Delete User"
                           disabled={userItem.id === user.id}
                         >
-                          🗑️ Delete
+                          Delete
                         </button>
                       </div>
                     </td>

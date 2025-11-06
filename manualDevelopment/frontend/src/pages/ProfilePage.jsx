@@ -153,7 +153,7 @@ const ProfilePage = () => {
         {/* Success Message */}
         {successMessage && !showPasswordModal && (
           <div className="alert alert-success">
-            ✓ {successMessage}
+             {successMessage}
           </div>
         )}
 
@@ -216,7 +216,7 @@ const ProfilePage = () => {
               className="btn-primary"
               onClick={handleOpenPasswordModal}
             >
-              🔒 Change Password
+               Change Password
             </button>
           </div>
         </div>
@@ -240,7 +240,7 @@ const ProfilePage = () => {
 
             {successMessage && (
               <div className="alert alert-success">
-                ✓ {successMessage}
+                 {successMessage}
               </div>
             )}
 

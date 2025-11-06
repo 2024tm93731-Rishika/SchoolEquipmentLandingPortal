@@ -257,14 +257,14 @@ const ManageEquipment = () => {
         {/* Success Message */}
         {successMessage && (
           <div className="alert alert-success">
-            ✓ {successMessage}
+             {successMessage}
           </div>
         )}
 
         {/* Error Message */}
         {error && !showModal && (
           <div className="alert alert-error">
-            ✗ {error}
+             {error}
           </div>
         )}
 
@@ -357,14 +357,14 @@ const ManageEquipment = () => {
                           onClick={() => handleEditEquipment(item)}
                           title="Edit Equipment"
                         >
-                          ✏️ Edit
+                           Edit
                         </button>
                         <button 
                           className="btn-delete"
                           onClick={() => handleDeleteEquipment(item.id, item.name)}
                           title="Delete Equipment"
                         >
-                          🗑️ Delete
+                           Delete
                         </button>
                       </div>
                     </td>

@@ -8,6 +8,7 @@ import TeacherDashboard from './pages/TeacherDashboard';
 import ManageUsers from './pages/ManageUsers';
 import ManageEquipment from './pages/ManageEquipment';
 import ProfilePage from './pages/ProfilePage';
+import BrowseEquipment from './pages/BrowseEquipment';
 import PlaceholderPage from './components/common/PlaceholderPage';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import './App.css';
@@ -119,11 +120,7 @@ function App() {
             path="/student/browse-equipment" 
             element={
               <ProtectedRoute allowedRoles={['Student']}>
-                <PlaceholderPage 
-                  title="Browse Equipment" 
-                  description="Browse and request available equipment"
-                  backPath="/student/dashboard"
-                />
+                <BrowseEquipment />
               </ProtectedRoute>
             } 
           />
@@ -177,11 +174,7 @@ function App() {
             path="/teacher/browse-equipment" 
             element={
               <ProtectedRoute allowedRoles={['Teacher']}>
-                <PlaceholderPage 
-                  title="Browse Equipment" 
-                  description="Browse and request available equipment"
-                  backPath="/teacher/dashboard"
-                />
+                <BrowseEquipment />
               </ProtectedRoute>
             } 
           />

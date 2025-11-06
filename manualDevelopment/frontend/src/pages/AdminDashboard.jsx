@@ -20,38 +20,38 @@ const AdminDashboard = () => {
   if (!user) return <div>Loading...</div>;
 
   const stats = [
-    { label: 'Total Users', value: '182', icon: '👥', color: '#4CAF50' },
-    { label: 'Total Equipment', value: '45', icon: '📦', color: '#2196F3' },
-    { label: 'Active Requests', value: '12', icon: '📋', color: '#FF9800' },
-    { label: 'Pending Approvals', value: '5', icon: '⏳', color: '#f44336' }
+    { label: 'Total Users', value: '182', icon: '', color: '#4CAF50' },
+    { label: 'Total Equipment', value: '45', icon: '', color: '#2196F3' },
+    { label: 'Active Requests', value: '12', icon: '', color: '#FF9800' },
+    { label: 'Pending Approvals', value: '5', icon: '', color: '#f44336' }
   ];
 
   const quickActions = [
     {
       title: 'Manage Users',
       description: 'Add, edit, or remove users',
-      icon: '👥',
+      icon: '',
       path: '/admin/users',
       color: '#4CAF50'
     },
     {
       title: 'Manage Equipment',
       description: 'Add, edit, or remove equipment',
-      icon: '📦',
+      icon: '',
       path: '/admin/equipment',
       color: '#2196F3'
     },
     {
       title: 'View All Requests',
       description: 'Review borrowing requests',
-      icon: '📋',
+      icon: '',
       path: '/admin/requests',
       color: '#FF9800'
     },
     {
       title: 'Reports & Analytics',
       description: 'View system reports',
-      icon: '📊',
+      icon: '',
       path: '/admin/reports',
       color: '#9C27B0'
     }

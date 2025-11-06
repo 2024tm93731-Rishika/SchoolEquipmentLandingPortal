@@ -3,19 +3,39 @@ import { useNavigate } from 'react-router-dom';
 import { getUser } from '../utils/auth';
 import Header from '../components/common/Header';
 import './StudentDashboard.css';
+import { equipmentAPI } from '../services/api';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [equipment, setEquipment] = useState([]);
+  const [loadingEquipment, setLoadingEquipment] = useState(true);
 
   useEffect(() => {
     const userData = getUser();
     if (userData && userData.role === 'Student') {
       setUser(userData);
+      fetchEquipment();
     } else {
       navigate('/dashboard');
     }
   }, [navigate]);
+
+  // Fetch only 4 equipment items for dashboard preview
+    const fetchEquipment = async () => {
+      try {
+        setLoadingEquipment(true);
+        const response = await equipmentAPI.getAll({ limit: 4 });
+        if (response.data.success) {
+          setEquipment(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch equipment:', err);
+      } finally {
+        setLoadingEquipment(false);
+      }
+    };
+  
 
   if (!user) return <div>Loading...</div>;
 
@@ -46,13 +66,6 @@ const StudentDashboard = () => {
     }
   ];
 
-  const availableEquipment = [
-    { id: 1, name: 'MacBook Pro', category: 'Laptop', available: 3 },
-    { id: 2, name: 'iPad Pro', category: 'Tablet', available: 5 },
-    { id: 3, name: 'Sony Camera', category: 'Camera', available: 2 },
-    { id: 4, name: 'Wireless Mic', category: 'Audio', available: 4 }
-  ];
-
   return (
     <div className="student-dashboard">
       <Header />
@@ -74,21 +87,21 @@ const StudentDashboard = () => {
         {/* Quick Stats */}
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon">📋</div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>{myRequests.length}</h3>
               <p>My Requests</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">✅</div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>{myRequests.filter(r => r.status === 'Approved').length}</h3>
               <p>Approved</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon">📦</div>
+            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>{myRequests.filter(r => r.status === 'Borrowed').length}</h3>
               <p>Currently Borrowed</p>
@@ -154,13 +167,13 @@ const StudentDashboard = () => {
           </div>
           
           <div className="equipment-grid">
-            {availableEquipment.map((item) => (
+            {equipment.map((item) => (
               <div key={item.id} className="equipment-card">
-                <div className="equipment-icon">📦</div>
+                <div className="equipment-icon"></div>
                 <h3>{item.name}</h3>
                 <p className="equipment-category">{item.category}</p>
                 <p className="equipment-availability">
-                  {item.available} available
+                  {item.available_quantity} available
                 </p>
                 <button 
                   className="btn-primary-small"
@@ -181,21 +194,21 @@ const StudentDashboard = () => {
               className="action-button"
               onClick={() => navigate('/student/browse-equipment')}
             >
-              <span className="action-icon">🔍</span>
+              <span className="action-icon"></span>
               <span>Browse Equipment</span>
             </button>
             <button 
               className="action-button"
               onClick={() => navigate('/student/requests')}
             >
-              <span className="action-icon">📋</span>
+              <span className="action-icon"></span>
               <span>My Requests</span>
             </button>
             <button 
               className="action-button"
               onClick={() => navigate('/profile')}
             >
-              <span className="action-icon">👤</span>
+              <span className="action-icon"></span>
               <span>My Profile</span>
             </button>
           </div>
