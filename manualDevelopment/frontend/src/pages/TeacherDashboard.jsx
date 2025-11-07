@@ -4,12 +4,19 @@ import { getUser } from '../utils/auth';
 import Header from '../components/common/Header';
 import { equipmentAPI } from '../services/api';
 import './TeacherDashboard.css';
+import RequestEquipmentModal from './RequestEquipmentModal';
+
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [equipment, setEquipment] = useState([]);
   const [loadingEquipment, setLoadingEquipment] = useState(true);
+  
+  // Modal states
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   useEffect(() => {
     const userData = getUser();
@@ -20,6 +27,18 @@ const TeacherDashboard = () => {
       navigate('/dashboard');
     }
   }, [navigate]);
+  
+  const handleRequest = (item) => {
+    setSelectedEquipment(item);
+    setShowRequestModal(true);
+  };
+
+  // Handle successful request - SHOWS SUCCESS MESSAGE
+  const handleRequestSuccess = (message) => {
+    setSuccessMessage(message);
+    fetchEquipment(); // Refresh to update quantities
+    setTimeout(() => setSuccessMessage(''), 5000);
+  };
 
   // Fetch only 4 equipment items for dashboard preview
   const fetchEquipment = async () => {
@@ -76,6 +95,13 @@ const TeacherDashboard = () => {
 
   return (
     <div className="teacher-dashboard">
+
+      {successMessage && (
+        <div className="success-toast">
+          {successMessage}
+        </div>
+      )}
+      
       <Header />
       
       <div className="dashboard-container">
@@ -240,11 +266,11 @@ const TeacherDashboard = () => {
                 <p className="equipment-availability">
                   {item.available_quantity} available
                 </p>
-                <button 
-                  className="btn-primary-small"
-                  onClick={() => navigate(`/teacher/equipment/${item.id}`)}
-                >
-                  Request
+                <button
+                    className={`request-btn ${item.available_quantity === 0 ? 'disabled' : ''}`}
+                    onClick={() => handleRequest(item)}
+                    disabled={item.available_quantity === 0}>
+                  {item.available_quantity > 0 ? 'Request' : 'Unavailable'}
                 </button>
               </div>
             ))}
@@ -282,6 +308,17 @@ const TeacherDashboard = () => {
           </div>
         </div>
       </div>
+      {/* Request Modal */}
+      {showRequestModal && selectedEquipment && (
+        <RequestEquipmentModal
+          equipment={selectedEquipment}
+          onClose={() => {
+            setShowRequestModal(false);
+            setSelectedEquipment(null);
+          }}
+          onSuccess={handleRequestSuccess}
+        />
+      )}
     </div>
   );
 };
