@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { equipmentAPI } from '../services/api';
 import './AvailableEquipment.css';
+import RequestEquipmentModal from './RequestEquipmentModal';
 
 const AvailableEquipment = () => {
   const [equipment, setEquipment] = useState([]);
@@ -12,6 +13,11 @@ const AvailableEquipment = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [categoryFilter, setCategoryFilter] = useState('');
   const [availabilityFilter, setAvailabilityFilter] = useState('all'); // 'all', 'available', 'unavailable'
+
+  // Modal states
+  const [showRequestModal, setShowRequestModal] = useState(false);
+  const [selectedEquipment, setSelectedEquipment] = useState(null);
+  const [successMessage, setSuccessMessage] = useState('');
 
   // Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -100,9 +106,15 @@ const AvailableEquipment = () => {
 
   // Handle request button click
   const handleRequest = (item) => {
-    // TODO: Navigate to request form or open request modal
-    console.log('Request equipment:', item);
-    alert(`Request functionality will be implemented soon!\n\nRequesting: ${item.name}`);
+    setSelectedEquipment(item);
+    setShowRequestModal(true);
+  };
+
+  // Handle successful request - SHOWS SUCCESS MESSAGE
+  const handleRequestSuccess = (message) => {
+    setSuccessMessage(message);
+    fetchEquipment(); // Refresh to update quantities
+    setTimeout(() => setSuccessMessage(''), 5000);
   };
 
   // Get condition badge color
@@ -173,6 +185,13 @@ const AvailableEquipment = () => {
 
   return (
     <div className="available-equipment">
+
+      {successMessage && (
+        <div className="success-toast">
+          {successMessage}
+        </div>
+      )}
+
       <div className="equipment-header">
         <h2>Available Equipment</h2>
         <p>Browse and request equipment for your needs</p>
@@ -357,6 +376,18 @@ const AvailableEquipment = () => {
             </>
           )}
         </>
+      )}
+
+      {/* Request Modal */}
+      {showRequestModal && selectedEquipment && (
+        <RequestEquipmentModal
+          equipment={selectedEquipment}
+          onClose={() => {
+            setShowRequestModal(false);
+            setSelectedEquipment(null);
+          }}
+          onSuccess={handleRequestSuccess}
+        />
       )}
     </div>
   );

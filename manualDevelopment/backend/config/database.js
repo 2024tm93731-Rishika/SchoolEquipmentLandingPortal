@@ -102,6 +102,35 @@ const initializeDatabase = () => {
       }
     });
 
+    db.run(`
+      CREATE TABLE IF NOT EXISTS equipment_requests (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER NOT NULL,
+        equipment_id INTEGER NOT NULL,
+        quantity INTEGER NOT NULL,
+        request_date DATETIME DEFAULT CURRENT_TIMESTAMP,
+        required_date DATE NULL,
+        return_date DATE NULL,
+        purpose TEXT NULL,
+        status TEXT DEFAULT 'Pending' CHECK(status IN ('Pending', 'Approved', 'Denied', 'Returned')),
+        approved_by INTEGER NULL,
+        approved_date DATETIME NULL,
+        denial_reason TEXT NULL,
+        notes TEXT NULL,
+        created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (equipment_id) REFERENCES equipment(id) ON DELETE CASCADE,
+        FOREIGN KEY (approved_by) REFERENCES users(id) ON DELETE SET NULL
+      )
+    `, (err) => {
+      if (err) {
+        console.error('❌ Error creating equipment_requests table:', err.message);
+      } else {
+        console.log('✅ Equipment requests table ready');
+      }
+    });
+
     // Create indexes
     db.run(`CREATE INDEX IF NOT EXISTS idx_users_email ON users(email)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_users_role ON users(role)`);
@@ -110,6 +139,12 @@ const initializeDatabase = () => {
     // Create indexes for equipment
     db.run(`CREATE INDEX IF NOT EXISTS idx_equipment_category ON equipment(category)`);
     db.run(`CREATE INDEX IF NOT EXISTS idx_equipment_condition ON equipment(condition)`);
+
+    // Equipment requests indexes
+    db.run(`CREATE INDEX IF NOT EXISTS idx_requests_user_id ON equipment_requests(user_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_requests_equipment_id ON equipment_requests(equipment_id)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_requests_status ON equipment_requests(status)`);
+    db.run(`CREATE INDEX IF NOT EXISTS idx_requests_date ON equipment_requests(request_date)`);
 
     // Seed admin users
     seedAdminUsers();

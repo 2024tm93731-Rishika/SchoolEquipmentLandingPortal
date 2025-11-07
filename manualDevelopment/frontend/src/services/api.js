@@ -69,4 +69,16 @@ export const equipmentAPI = {
   getCategories: () => api.get('/equipment/categories')
 };
 
+// Requests API
+export const requestsAPI = {
+  create: (data) => api.post('/requests', data),
+  getMyRequests: () => api.get('/requests/my-requests'),
+  getAll: (params) => api.get('/requests', { params }),
+  getById: (id) => api.get(`/requests/${id}`),
+  approve: (id, data) => api.patch(`/requests/${id}/approve`, data),
+  deny: (id, data) => api.patch(`/requests/${id}/deny`, data),
+  cancel: (id) => api.patch(`/requests/${id}/cancel`),
+  getStats: () => api.get('/requests/stats/summary')
+};
+
 export default api;

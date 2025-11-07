@@ -21,7 +21,13 @@ const authenticate = (req, res, next) => {
     const decoded = verifyToken(token);
     
     // Attach user info to request object
-    req.user = decoded;
+    req.user = {
+      id: decoded.userId,
+      userId: decoded.userId,
+      email: decoded.email,
+      role: decoded.role,
+      fullName: decoded.fullName
+    };
     
     next();
   } catch (error) {
@@ -59,8 +65,40 @@ const isAdminOrTeacher = (req, res, next) => {
   next();
 };
 
+
+/**
+ * Alias for authenticate (for compatibility)
+ */
+const authenticateToken = authenticate;
+
+/**
+ * Middleware to authorize specific roles
+ * @param {Array} allowedRoles - Array of roles that are allowed
+ */
+const authorizeRoles = (allowedRoles) => {
+  return (req, res, next) => {
+    if (!req.user || !req.user.role) {
+      return res.status(401).json({
+        success: false,
+        message: 'User not authenticated'
+      });
+    }
+
+    if (!allowedRoles.includes(req.user.role)) {
+      return res.status(403).json({
+        success: false,
+        message: `Access denied. Required roles: ${allowedRoles.join(', ')}`
+      });
+    }
+
+    next();
+  };
+};
+
 module.exports = {
   authenticate,
+  authenticateToken,
   isAdmin,
-  isAdminOrTeacher
+  isAdminOrTeacher,
+  authorizeRoles
 };
