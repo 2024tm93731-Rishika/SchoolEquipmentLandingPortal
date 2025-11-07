@@ -9,6 +9,7 @@ import ManageUsers from './pages/ManageUsers';
 import ManageEquipment from './pages/ManageEquipment';
 import ProfilePage from './pages/ProfilePage';
 import BrowseEquipment from './pages/BrowseEquipment';
+import ViewRequest from './pages/ViewRequestsPage';
 import PlaceholderPage from './components/common/PlaceholderPage';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import './App.css';
@@ -128,11 +129,12 @@ function App() {
             path="/student/requests" 
             element={
               <ProtectedRoute allowedRoles={['Student']}>
-                <PlaceholderPage 
+                {/*<PlaceholderPage 
                   title="My Requests" 
                   description="View and manage your equipment requests"
                   backPath="/student/dashboard"
-                />
+                /> */}
+                <ViewRequest />
               </ProtectedRoute>
             } 
           />
@@ -182,11 +184,12 @@ function App() {
             path="/teacher/requests" 
             element={
               <ProtectedRoute allowedRoles={['Teacher']}>
-                <PlaceholderPage 
+                {/*<PlaceholderPage 
                   title="My Requests" 
                   description="View and manage your equipment requests"
                   backPath="/teacher/dashboard"
-                />
+                /> */}
+                <ViewRequest />
               </ProtectedRoute>
             } 
           />

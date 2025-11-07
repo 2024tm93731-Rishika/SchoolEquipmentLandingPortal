@@ -5,7 +5,7 @@ import Header from '../components/common/Header';
 import { equipmentAPI } from '../services/api';
 import './TeacherDashboard.css';
 import RequestEquipmentModal from './RequestEquipmentModal';
-
+import { requestsAPI } from "../services/api";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -17,12 +17,16 @@ const TeacherDashboard = () => {
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
   const [successMessage, setSuccessMessage] = useState('');
+  
+  const [myRequests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const userData = getUser();
     if (userData && userData.role === 'Teacher') {
       setUser(userData);
       fetchEquipment();
+      fetchRequests();
     } else {
       navigate('/dashboard');
     }
@@ -55,26 +59,29 @@ const TeacherDashboard = () => {
     }
   };
 
-  if (!user) return <div>Loading...</div>;
-
-  const myRequests = [
-    { 
-      id: 1,
-      equipment: 'Projector Sony 4K',
-      status: 'Borrowed',
-      requestDate: '2024-10-27',
-      dueDate: '2024-11-03',
-      color: '#2196F3'
-    },
-    { 
-      id: 2,
-      equipment: 'Microphone Set',
-      status: 'Approved',
-      requestDate: '2024-10-29',
-      dueDate: '2024-11-05',
-      color: '#4CAF50'
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await requestsAPI.getMyRequests({ limit: 4 });
+      if (response.data.success) {
+        setRequests(response.data.data || []);
+      } else {
+        setRequests([]);
+      }
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+    } finally {
+      setLoading(false);
     }
-  ];
+  };
+  
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
+
+  if (!user) return <div>Loading...</div>;
 
   const pendingApprovals = [
     {
@@ -101,7 +108,7 @@ const TeacherDashboard = () => {
           {successMessage}
         </div>
       )}
-      
+
       <Header />
       
       <div className="dashboard-container">
@@ -216,7 +223,7 @@ const TeacherDashboard = () => {
             {myRequests.map((request) => (
               <div key={request.id} className="request-card">
                 <div className="request-header">
-                  <h3>{request.equipment}</h3>
+                  <h3>{request.equipment_name}</h3>
                   <span 
                     className="status-badge"
                     style={{ backgroundColor: request.color }}
@@ -226,20 +233,18 @@ const TeacherDashboard = () => {
                 </div>
                 <div className="request-details">
                   <div className="detail-item">
+                    <span className="label">Quantity</span>
+                    <span>{request.quantity}</span>
+                  </div>
+                  <div className="detail-item">
                     <span className="label">Request Date:</span>
-                    <span>{request.requestDate}</span>
+                    <span>{formatDate(request.request_date)}</span>
                   </div>
                   <div className="detail-item">
                     <span className="label">Due Date:</span>
-                    <span>{request.dueDate}</span>
+                    <span>{request.return_date}</span>
                   </div>
                 </div>
-                <button 
-                  className="btn-secondary-small"
-                  onClick={() => navigate(`/teacher/request/${request.id}`)}
-                >
-                  View Details
-                </button>
               </div>
             ))}
           </div>
@@ -260,7 +265,6 @@ const TeacherDashboard = () => {
           <div className="equipment-grid">
             {equipment.map((item) => (
               <div key={item.id} className="equipment-card">
-                <div className="equipment-icon"></div>
                 <h3>{item.name}</h3>
                 <p className="equipment-category">{item.category}</p>
                 <p className="equipment-availability">

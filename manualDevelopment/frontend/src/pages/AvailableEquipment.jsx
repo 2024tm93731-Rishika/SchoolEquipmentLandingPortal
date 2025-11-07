@@ -192,11 +192,6 @@ const AvailableEquipment = () => {
         </div>
       )}
 
-      <div className="equipment-header">
-        <h2>Available Equipment</h2>
-        <p>Browse and request equipment for your needs</p>
-      </div>
-
       {/* Search and Filters */}
       <div className="equipment-filters">
         <div className="search-box">

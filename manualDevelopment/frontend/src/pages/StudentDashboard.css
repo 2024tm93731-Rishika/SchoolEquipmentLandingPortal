@@ -161,7 +161,7 @@
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
-  color: white;
+  color: black;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
@@ -169,7 +169,7 @@
 
 .request-details {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr 1fr 1fr 1fr;
   gap: 12px;
   margin-bottom: 16px;
 }

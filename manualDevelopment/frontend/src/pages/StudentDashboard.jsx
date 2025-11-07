@@ -5,6 +5,7 @@ import Header from '../components/common/Header';
 import './StudentDashboard.css';
 import { equipmentAPI } from '../services/api';
 import RequestEquipmentModal from './RequestEquipmentModal';
+import { requestsAPI } from '../services/api';
 
 const StudentDashboard = () => {
   const navigate = useNavigate();
@@ -15,13 +16,17 @@ const StudentDashboard = () => {
   // Modal states
   const [showRequestModal, setShowRequestModal] = useState(false);
   const [selectedEquipment, setSelectedEquipment] = useState(null);
-  const [successMessage, setSuccessMessage] = useState('');
+  const [successMessage, setSuccessMessage] = useState();
+
+  const [myRequests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const userData = getUser();
     if (userData && userData.role === 'Student') {
       setUser(userData);
       fetchEquipment();
+      fetchRequests();
     } else {
       navigate('/dashboard');
     }
@@ -40,49 +45,43 @@ const StudentDashboard = () => {
   };
 
   // Fetch only 4 equipment items for dashboard preview
-    const fetchEquipment = async () => {
-      try {
-        setLoadingEquipment(true);
-        const response = await equipmentAPI.getAll({ limit: 4 });
-        if (response.data.success) {
-          setEquipment(response.data.data);
-        }
-      } catch (err) {
-        console.error('Failed to fetch equipment:', err);
-      } finally {
-        setLoadingEquipment(false);
+  const fetchEquipment = async () => {
+    try {
+      setLoadingEquipment(true);
+      const response = await equipmentAPI.getAll({ limit: 4 });
+      if (response.data.success) {
+        setEquipment(response.data.data);
       }
-    };
+    } catch (err) {
+      console.error('Failed to fetch equipment:', err);
+    } finally {
+      setLoadingEquipment(false);
+    }
+  };
+
+  const fetchRequests = async () => {
+    try {
+      setLoading(true);
+      const response = await requestsAPI.getMyRequests({ limit: 4 });
+      if (response.data.success) {
+        setRequests(response.data.data || []);
+      } else {
+        setRequests([]);
+      }
+    } catch (error) {
+      console.error("Error fetching requests:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
   
+  const formatDate = (dateString) => {
+    if (!dateString) return "-";
+    const date = new Date(dateString);
+    return date.toLocaleDateString();
+  };
 
   if (!user) return <div>Loading...</div>;
-
-  const myRequests = [
-    { 
-      id: 1,
-      equipment: 'Laptop Dell XPS 15',
-      status: 'Approved',
-      requestDate: '2024-10-28',
-      dueDate: '2024-11-04',
-      color: '#4CAF50'
-    },
-    { 
-      id: 2,
-      equipment: 'Projector Epson',
-      status: 'Pending',
-      requestDate: '2024-10-29',
-      dueDate: '2024-11-05',
-      color: '#FF9800'
-    },
-    { 
-      id: 3,
-      equipment: 'Camera Canon EOS',
-      status: 'Borrowed',
-      requestDate: '2024-10-25',
-      dueDate: '2024-11-01',
-      color: '#2196F3'
-    }
-  ];
 
   return (
     <div className="student-dashboard">
@@ -92,16 +91,16 @@ const StudentDashboard = () => {
           {successMessage}
         </div>
       )}
-      
+
       <Header />
-      
+
       <div className="dashboard-container">
         <div className="dashboard-header">
           <div>
             <h1>Student Dashboard</h1>
             <p>Welcome back, {user.full_name}!</p>
           </div>
-          <button 
+          <button
             className="btn-primary"
             onClick={() => navigate('/student/browse-equipment')}
           >
@@ -138,20 +137,20 @@ const StudentDashboard = () => {
         <div className="section">
           <div className="section-header">
             <h2>My Requests</h2>
-            <button 
+            <button
               className="btn-link"
               onClick={() => navigate('/student/requests')}
             >
               View All →
             </button>
           </div>
-          
+
           <div className="requests-list">
             {myRequests.map((request) => (
               <div key={request.id} className="request-card">
                 <div className="request-header">
-                  <h3>{request.equipment}</h3>
-                  <span 
+                  <h3>{request.equipment_name}</h3>
+                  <span
                     className="status-badge"
                     style={{ backgroundColor: request.color }}
                   >
@@ -160,20 +159,18 @@ const StudentDashboard = () => {
                 </div>
                 <div className="request-details">
                   <div className="detail-item">
+                    <span className="label">Quantity</span>
+                    <span>{request.quantity}</span>
+                  </div>
+                  <div className="detail-item">
                     <span className="label">Request Date:</span>
-                    <span>{request.requestDate}</span>
+                    <span>{formatDate(request.request_date)}</span>
                   </div>
                   <div className="detail-item">
                     <span className="label">Due Date:</span>
-                    <span>{request.dueDate}</span>
+                    <span>{request.return_date}</span>
                   </div>
                 </div>
-                <button 
-                  className="btn-secondary-small"
-                  onClick={() => navigate(`/student/request/${request.id}`)}
-                >
-                  View Details
-                </button>
               </div>
             ))}
           </div>
@@ -183,26 +180,25 @@ const StudentDashboard = () => {
         <div className="section">
           <div className="section-header">
             <h2>Available Equipment</h2>
-            <button 
+            <button
               className="btn-link"
               onClick={() => navigate('/student/browse-equipment')}
             >
               Browse All →
             </button>
           </div>
-          
+
           <div className="equipment-grid">
             {equipment.map((item) => (
               <div key={item.id} className="equipment-card">
-                <div className="equipment-icon"></div>
                 <h3>{item.name}</h3>
                 <p className="equipment-category">{item.category}</p>
                 <p className="equipment-availability">
                   {item.available_quantity} available
                 </p>
                 <button
-                    className={`request-btn ${item.available_quantity === 0 ? 'disabled' : ''}`}
-                    onClick={() => handleRequest(item)}
+                  className={`request-btn ${item.available_quantity === 0 ? 'disabled' : ''}`}
+                  onClick={() => handleRequest(item)}
                     disabled={item.available_quantity === 0}>
                   {item.available_quantity > 0 ? 'Request' : 'Unavailable'}
                 </button>
@@ -215,25 +211,22 @@ const StudentDashboard = () => {
         <div className="section">
           <h2>Quick Actions</h2>
           <div className="quick-actions">
-            <button 
+            <button
               className="action-button"
               onClick={() => navigate('/student/browse-equipment')}
             >
-              <span className="action-icon"></span>
               <span>Browse Equipment</span>
             </button>
-            <button 
+            <button
               className="action-button"
               onClick={() => navigate('/student/requests')}
             >
-              <span className="action-icon"></span>
               <span>My Requests</span>
             </button>
-            <button 
+            <button
               className="action-button"
               onClick={() => navigate('/profile')}
             >
-              <span className="action-icon"></span>
               <span>My Profile</span>
             </button>
           </div>
