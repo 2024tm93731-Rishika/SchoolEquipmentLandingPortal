@@ -10,6 +10,7 @@ import ManageEquipment from './pages/ManageEquipment';
 import ProfilePage from './pages/ProfilePage';
 import BrowseEquipment from './pages/BrowseEquipment';
 import ViewRequest from './pages/ViewRequestsPage';
+import PendingRequests from './pages/PendingRequests';
 import PlaceholderPage from './components/common/PlaceholderPage';
 import { isAuthenticated, getUserRole } from './utils/auth';
 import './App.css';
@@ -72,14 +73,10 @@ function App() {
             } 
           />
           <Route 
-            path="/admin/requests" 
+            path="/admin/all-requests" 
             element={
               <ProtectedRoute allowedRoles={['Admin']}>
-                <PlaceholderPage 
-                  title="View All Requests" 
-                  description="Review and manage all borrowing requests"
-                  backPath="/admin/dashboard"
-                />
+                <PendingRequests />
               </ProtectedRoute>
             } 
           />
@@ -194,14 +191,10 @@ function App() {
             } 
           />
           <Route 
-            path="/teacher/approvals" 
+            path="/teacher/all-requests" 
             element={
               <ProtectedRoute allowedRoles={['Teacher']}>
-                <PlaceholderPage 
-                  title="Student Approvals" 
-                  description="Review and approve student requests"
-                  backPath="/teacher/dashboard"
-                />
+                <PendingRequests />
               </ProtectedRoute>
             } 
           />
@@ -224,7 +217,7 @@ function App() {
                 <PlaceholderPage 
                   title="Approval Details" 
                   description="Review and approve/decline this request"
-                  backPath="/teacher/approvals"
+                  backPath="/teacher/all-requests"
                 />
               </ProtectedRoute>
             } 

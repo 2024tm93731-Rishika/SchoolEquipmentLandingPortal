@@ -51,6 +51,55 @@ const dbAll = (sql, params = []) => {
   });
 };
 
+// Update equipment_requests table schema to ensure all columns exist
+const updateEquipmentRequestsSchema = () => {
+  console.log('Checking equipment_requests schema...');
+  
+  db.all("PRAGMA table_info(equipment_requests)", [], (err, columns) => {
+    if (err) {
+      console.error('Error checking table schema:', err.message);
+      return;
+    }
+
+    const columnNames = columns.map(col => col.name);
+    const updates = [];
+
+    // Check for rejection_reason column
+    if (!columnNames.includes('rejection_reason')) {
+      updates.push({
+        name: 'rejection_reason',
+        sql: 'ALTER TABLE equipment_requests ADD COLUMN rejection_reason TEXT'
+      });
+    }
+
+    // Check for updated_at column
+    if (!columnNames.includes('updated_at')) {
+      updates.push({
+        name: 'updated_at',
+        sql: 'ALTER TABLE equipment_requests ADD COLUMN updated_at DATETIME DEFAULT CURRENT_TIMESTAMP'
+      });
+    }
+
+    // Execute updates
+    if (updates.length > 0) {
+      console.log(`Adding ${updates.length} missing column(s)...`);
+      db.serialize(() => {
+        updates.forEach(update => {
+          db.run(update.sql, (err) => {
+            if (err) {
+              console.error(`Error adding ${update.name} column:`, err.message);
+            } else {
+              console.log(`Added ${update.name} column`);
+            }
+          });
+        });
+      });
+    } else {
+      console.log('All required columns already exist');
+    }
+  });
+};
+
 // Initialize database schema
 const initializeDatabase = () => {
   console.log('Initializing database...');
@@ -116,6 +165,7 @@ const initializeDatabase = () => {
         approved_by INTEGER NULL,
         approved_date DATETIME NULL,
         denial_reason TEXT NULL,
+        rejection_reason TEXT NULL,
         notes TEXT NULL,
         created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
         updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -125,9 +175,10 @@ const initializeDatabase = () => {
       )
     `, (err) => {
       if (err) {
-        console.error('❌ Error creating equipment_requests table:', err.message);
+        console.error('Error creating equipment_requests table:', err.message);
       } else {
-        console.log('✅ Equipment requests table ready');
+        console.log('Equipment requests table ready');
+        updateEquipmentRequestsSchema();
       }
     });
 

@@ -3,6 +3,71 @@ const router = express.Router();
 const { db, dbRun, dbGet, dbAll } = require('../config/database');
 const { authenticateToken, authorizeRoles } = require('../middleware/auth');
 
+// Get pending requests with pagination (Teachers and Admins)
+router.get('/pending', authenticateToken, authorizeRoles(['teacher', 'admin']), (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = 15;
+  const offset = (page - 1) * limit;
+
+  // Count total pending requests
+  const countQuery = `
+    SELECT COUNT(*) as total 
+    FROM borrow_requests 
+    WHERE status = 'pending'
+  `;
+
+  db.get(countQuery, [], (err, countResult) => {
+    if (err) {
+      return res.status(500).json({ message: 'Error counting requests', error: err.message });
+    }
+
+    const totalRequests = countResult.total;
+    const totalPages = Math.ceil(totalRequests / limit);
+
+    // Get paginated requests with user and equipment details
+    const query = `
+      SELECT 
+        br.id,
+        br.user_id,
+        br.equipment_id,
+        br.requested_date,
+        br.expected_return_date,
+        br.purpose,
+        br.status,
+        br.created_at,
+        u.name as student_name,
+        u.email as student_email,
+        e.name as equipment_name,
+        e.category as equipment_category,
+        e.quantity as equipment_quantity
+      FROM borrow_requests br
+      JOIN users u ON br.user_id = u.id
+      JOIN equipment e ON br.equipment_id = e.id
+      WHERE br.status = 'pending'
+      ORDER BY br.created_at DESC
+      LIMIT ? OFFSET ?
+    `;
+
+    db.all(query, [limit, offset], (err, requests) => {
+      if (err) {
+        return res.status(500).json({ message: 'Error fetching requests', error: err.message });
+      }
+
+      res.json({
+        requests,
+        pagination: {
+          currentPage: page,
+          totalPages,
+          totalRequests,
+          requestsPerPage: limit,
+          hasNextPage: page < totalPages,
+          hasPrevPage: page > 1
+        }
+      });
+    });
+  });
+});
+
 // Create a new equipment request (Students & Teachers)
 router.post('/', authenticateToken, authorizeRoles(['Student', 'Teacher']), async (req, res) => {
   try {

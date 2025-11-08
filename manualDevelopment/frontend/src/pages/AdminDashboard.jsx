@@ -45,7 +45,7 @@ const AdminDashboard = () => {
       title: 'View All Requests',
       description: 'Review borrowing requests',
       icon: '',
-      path: '/admin/requests',
+      path: '/admin/all-requests',
       color: '#FF9800'
     },
     {
