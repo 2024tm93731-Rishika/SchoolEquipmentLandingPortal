@@ -6,6 +6,7 @@ import { equipmentAPI } from "../services/api";
 import "./TeacherDashboard.css";
 import RequestEquipmentModal from "./RequestEquipmentModal";
 import { requestsAPI } from "../services/api";
+import CommonPopup from "../components/common/CommonPopup";
 
 const TeacherDashboard = () => {
   const navigate = useNavigate();
@@ -26,6 +27,21 @@ const TeacherDashboard = () => {
   const [showRejectModal, setShowRejectModal] = useState(false);
   const [rejectionReason, setRejectionReason] = useState("");
   const [actionLoading, setActionLoading] = useState(false);
+
+  // Popup state
+  const [popup, setPopup] = useState({
+    isOpen: false,
+    message: "",
+    type: "info",
+    buttonText: "OK",
+  });
+
+  // Confirmation popup state
+  const [confirmPopup, setConfirmPopup] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: null,
+  });
 
   useEffect(() => {
     const userData = getUser();
@@ -111,25 +127,45 @@ const TeacherDashboard = () => {
   };
 
   const handleApprove = async (id) => {
-    if (!window.confirm("Are you sure you want to approve this request?")) {
-      return;
-    }
-
-    try {
-      setActionLoading(true);
-      const response = await requestsAPI.approve(id, { notes: "" });
-      if (response.data.success) {
-        alert("Request approved successfully!");
-        fetchPendingRequests();
-      } else {
-        alert(response.data.message || "Failed to approve request.");
+    const approveRequest = async () => {
+      setConfirmPopup({ isOpen: false, message: "", onConfirm: null });
+      try {
+        setActionLoading(true);
+        const response = await requestsAPI.approve(id, { notes: "" });
+        if (response.data.success) {
+          setPopup({
+            isOpen: true,
+            message: "Request approved successfully!",
+            type: "success",
+            buttonText: "OK",
+          });
+          fetchPendingRequests();
+        } else {
+          setPopup({
+            isOpen: true,
+            message: response.data.message || "Failed to approve request.",
+            type: "error",
+            buttonText: "OK",
+          });
+        }
+      } catch (error) {
+        console.error("Error approving request:", error);
+        setPopup({
+          isOpen: true,
+          message: error.response?.data?.message || "Failed to approve request.",
+          type: "error",
+          buttonText: "OK",
+        });
+      } finally {
+        setActionLoading(false);
       }
-    } catch (error) {
-      console.error("Error approving request:", error);
-      alert(error.response?.data?.message || "Failed to approve request.");
-    } finally {
-      setActionLoading(false);
-    }
+    };
+
+    setConfirmPopup({
+      isOpen: true,
+      message: "Are you sure you want to approve this request?",
+      onConfirm: approveRequest,
+    });
   };
 
   const handleRejectClick = (request) => {
@@ -142,7 +178,12 @@ const TeacherDashboard = () => {
     e.preventDefault();
 
     if (!rejectionReason.trim()) {
-      alert("Please provide a rejection reason");
+      setPopup({
+        isOpen: true,
+        message: "Please provide a rejection reason",
+        type: "warning",
+        buttonText: "OK",
+      });
       return;
     }
 
@@ -153,17 +194,32 @@ const TeacherDashboard = () => {
       });
 
       if (response.data.success) {
-        alert("Request rejected successfully!");
+        setPopup({
+          isOpen: true,
+          message: "Request rejected successfully!",
+          type: "success",
+          buttonText: "OK",
+        });
         setShowRejectModal(false);
         setSelectedRequest(null);
         setRejectionReason("");
         fetchPendingRequests();
       } else {
-        alert(response.data.message || "Failed to reject request.");
+        setPopup({
+          isOpen: true,
+          message: response.data.message || "Failed to reject request.",
+          type: "error",
+          buttonText: "OK",
+        });
       }
     } catch (error) {
       console.error("Error rejecting request:", error);
-      alert(error.response?.data?.message || "Failed to reject request.");
+      setPopup({
+        isOpen: true,
+        message: error.response?.data?.message || "Failed to reject request.",
+        type: "error",
+        buttonText: "OK",
+      });
     } finally {
       setActionLoading(false);
     }
@@ -463,6 +519,27 @@ const TeacherDashboard = () => {
           </div>
         </div>
       )}
+
+      {/* Common Popup */}
+      <CommonPopup
+        message={popup.message}
+        isOpen={popup.isOpen}
+        onClose={() => setPopup({ ...popup, isOpen: false })}
+        type={popup.type}
+        buttonText={popup.buttonText}
+      />
+
+      {/* Confirmation Popup */}
+      <CommonPopup
+        message={confirmPopup.message}
+        isOpen={confirmPopup.isOpen}
+        onClose={() => setConfirmPopup({ ...confirmPopup, isOpen: false })}
+        type="warning"
+        confirm={true}
+        onConfirm={confirmPopup.onConfirm || (() => {})}
+        confirmText="Approve"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
