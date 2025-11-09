@@ -31,10 +31,10 @@ info:
     name: MIT
 
 servers:
-  - url: http://localhost:5000/api
-    description: Local development server
-  - url: https://api.example.com/api
-    description: Production server (update with your domain)
+  - url: https://school-equipment-landing-portal.vercel.app/api
+    description: Production development server
+  - url: https://localhost:5000/api
+    description: Local server 
 
 components:
   securitySchemes:
