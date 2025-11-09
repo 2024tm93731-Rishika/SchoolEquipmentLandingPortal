@@ -4,6 +4,7 @@ import { getUser } from '../utils/auth';
 import Header from '../components/common/Header';
 import { usersAPI } from '../services/api';
 import './ManageUsers.css';
+import CommonPopup from '../components/common/CommonPopup';
 
 const ManageUsers = () => {
   const navigate = useNavigate();
@@ -24,6 +25,13 @@ const ManageUsers = () => {
   
   // Filter state
   const [roleFilter, setRoleFilter] = useState(''); // '', 'Student', 'Teacher', 'Admin'
+  
+  // Confirmation popup state
+  const [confirmPopup, setConfirmPopup] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: null,
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -212,7 +220,8 @@ const ManageUsers = () => {
 
   // Delete user
   const handleDeleteUser = async (userId, userName) => {
-    if (window.confirm(`Are you sure you want to delete ${userName}?`)) {
+    const deleteUser = async () => {
+      setConfirmPopup({ isOpen: false, message: "", onConfirm: null });
       try {
         const response = await usersAPI.delete(userId);
         if (response.data.success) {
@@ -228,7 +237,13 @@ const ManageUsers = () => {
         }
         setTimeout(() => setError(''), 3000);
       }
-    }
+    };
+
+    setConfirmPopup({
+      isOpen: true,
+      message: `Are you sure you want to delete ${userName}?`,
+      onConfirm: deleteUser,
+    });
   };
 
   // Close modal
@@ -541,6 +556,18 @@ const ManageUsers = () => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Popup */}
+      <CommonPopup
+        message={confirmPopup.message}
+        isOpen={confirmPopup.isOpen}
+        onClose={() => setConfirmPopup({ ...confirmPopup, isOpen: false })}
+        type="warning"
+        confirm={true}
+        onConfirm={confirmPopup.onConfirm || (() => {})}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };

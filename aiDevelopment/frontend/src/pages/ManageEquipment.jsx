@@ -4,6 +4,7 @@ import { getUser } from '../utils/auth';
 import Header from '../components/common/Header';
 import { equipmentAPI } from '../services/api';
 import './ManageEquipment.css';
+import CommonPopup from '../components/common/CommonPopup';
 
 const ManageEquipment = () => {
   const navigate = useNavigate();
@@ -24,6 +25,13 @@ const ManageEquipment = () => {
   
   // Filter state
   const [categoryFilter, setCategoryFilter] = useState(''); // '', 'Sports Kits', 'Lab Equipment', etc.
+  
+  // Confirmation popup state
+  const [confirmPopup, setConfirmPopup] = useState({
+    isOpen: false,
+    message: "",
+    onConfirm: null,
+  });
   
   // Form state
   const [formData, setFormData] = useState({
@@ -211,7 +219,8 @@ const ManageEquipment = () => {
 
   // Delete equipment
   const handleDeleteEquipment = async (id, name) => {
-    if (window.confirm(`Are you sure you want to delete ${name}?`)) {
+    const deleteEquipment = async () => {
+      setConfirmPopup({ isOpen: false, message: "", onConfirm: null });
       try {
         const response = await equipmentAPI.delete(id);
         if (response.data.success) {
@@ -227,7 +236,13 @@ const ManageEquipment = () => {
         }
         setTimeout(() => setError(''), 3000);
       }
-    }
+    };
+
+    setConfirmPopup({
+      isOpen: true,
+      message: `Are you sure you want to delete ${name}?`,
+      onConfirm: deleteEquipment,
+    });
   };
 
   // Close modal
@@ -547,6 +562,18 @@ const ManageEquipment = () => {
           </div>
         </div>
       )}
+
+      {/* Confirmation Popup */}
+      <CommonPopup
+        message={confirmPopup.message}
+        isOpen={confirmPopup.isOpen}
+        onClose={() => setConfirmPopup({ ...confirmPopup, isOpen: false })}
+        type="warning"
+        confirm={true}
+        onConfirm={confirmPopup.onConfirm || (() => {})}
+        confirmText="Delete"
+        cancelText="Cancel"
+      />
     </div>
   );
 };
