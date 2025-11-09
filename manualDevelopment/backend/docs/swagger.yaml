@@ -31,7 +31,7 @@ info:
     name: MIT
 
 servers:
-  - url: https://school-equipment-landing-portal.vercel.app/api
+  - url: https://school-equipment-landing-portal-q6q.vercel.app/api
     description: Production development server (Vercel Live)
   - url: https://localhost:5000/api
     description: Local server 
