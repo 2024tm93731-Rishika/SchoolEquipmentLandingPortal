@@ -100,79 +100,39 @@ const StudentDashboard = () => {
             <h1>Student Dashboard</h1>
             <p>Welcome back, {user.full_name}!</p>
           </div>
-          <button
+          {/* <button
             className="btn-primary"
             onClick={() => navigate('/student/browse-equipment')}
           >
             Browse Equipment
-          </button>
+          </button> */}
         </div>
 
         {/* Quick Stats */}
         <div className="stats-grid">
           <div className="stat-card">
-            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>{myRequests.length}</h3>
-              <p>My Requests</p>
+              <p>My All Requests</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
             <div className="stat-content">
               <h3>{myRequests.filter(r => r.status === 'Approved').length}</h3>
-              <p>Approved</p>
+              <p>Approved Requests</p>
             </div>
           </div>
           <div className="stat-card">
-            <div className="stat-icon"></div>
             <div className="stat-content">
-              <h3>{myRequests.filter(r => r.status === 'Borrowed').length}</h3>
-              <p>Currently Borrowed</p>
+              <h3>{myRequests.filter(r => r.status === 'Pending').length}</h3>
+              <p>Pending Requests</p>
             </div>
           </div>
-        </div>
-
-        {/* My Requests */}
-        <div className="section">
-          <div className="section-header">
-            <h2>My Requests</h2>
-            <button
-              className="btn-link"
-              onClick={() => navigate('/student/requests')}
-            >
-              View All →
-            </button>
-          </div>
-
-          <div className="requests-list">
-            {myRequests.map((request) => (
-              <div key={request.id} className="request-card">
-                <div className="request-header">
-                  <h3>{request.equipment_name}</h3>
-                  <span
-                    className="status-badge"
-                    style={{ backgroundColor: request.color }}
-                  >
-                    {request.status}
-                  </span>
-                </div>
-                <div className="request-details">
-                  <div className="detail-item">
-                    <span className="label">Quantity</span>
-                    <span>{request.quantity}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Request Date:</span>
-                    <span>{formatDate(request.request_date)}</span>
-                  </div>
-                  <div className="detail-item">
-                    <span className="label">Due Date:</span>
-                    <span>{request.return_date}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
+          <div className="stat-card">
+            <div className="stat-content">
+              <h3>{myRequests.filter(r => r.status === 'Denied').length}</h3>
+              <p>Rejected Requests</p>
+            </div>
           </div>
         </div>
 
@@ -202,6 +162,48 @@ const StudentDashboard = () => {
                     disabled={item.available_quantity === 0}>
                   {item.available_quantity > 0 ? 'Request' : 'Unavailable'}
                 </button>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* My Requests */}
+        <div className="section">
+          <div className="section-header">
+            <h2>My Requests</h2>
+            <button
+              className="btn-link"
+              onClick={() => navigate('/student/requests')}
+            >
+              View All →
+            </button>
+          </div>
+
+          <div className="requests-list">
+            {myRequests.map((request) => (
+              <div key={request.id} className="request-card">
+                <div className="request-header">
+                  <h3>{request.equipment_name}</h3>
+                  <span
+                    className={`status-badge statues-${request.status.toLowerCase().replace(' ', '-')}`}
+                  >
+                    {request.status}
+                  </span>
+                </div>
+                <div className="request-details">
+                  <div className="detail-item">
+                    <span className="label">Quantity</span>
+                    <span>{request.quantity}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Request Date:</span>
+                    <span>{formatDate(request.request_date)}</span>
+                  </div>
+                  <div className="detail-item">
+                    <span className="label">Due Date:</span>
+                    <span>{request.return_date}</span>
+                  </div>
+                </div>
               </div>
             ))}
           </div>

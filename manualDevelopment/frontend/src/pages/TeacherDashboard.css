@@ -67,7 +67,7 @@
   margin: 0;
 }
 
-.status-badge1 {
+.status-badge {
   padding: 6px 12px;
   border-radius: 20px;
   font-size: 12px;
@@ -76,6 +76,17 @@
   text-transform: uppercase;
 }
 
+.statues-approved{
+  background-color: #4CAF50;
+}
+
+.statues-pending{
+  background-color: #FF9800;
+}
+
+.statues-denied{
+  background-color: #f44336;
+}
 
 .approval-details {
   display: grid;

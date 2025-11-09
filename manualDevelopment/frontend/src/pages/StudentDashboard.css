@@ -161,10 +161,25 @@
 .status-badge {
   padding: 6px 12px;
   border-radius: 20px;
-  color: black;
   font-size: 12px;
   font-weight: 600;
   text-transform: uppercase;
+}
+
+.status-badge {
+  color: white;
+}
+
+.statues-approved{
+  background-color: #4CAF50;
+}
+
+.statues-pending{
+  background-color: #FF9800;
+}
+
+.statues-denied{
+  background-color: #f44336;
 }
 
 .request-details {

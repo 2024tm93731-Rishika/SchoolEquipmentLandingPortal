@@ -3,28 +3,104 @@ import { useNavigate } from 'react-router-dom';
 import { getUser } from '../utils/auth';
 import Header from '../components/common/Header';
 import './AdminDashboard.css';
+import { equipmentAPI } from '../services/api';
+import { usersAPI } from '../services/api';
+import { requestsAPI } from '../services/api';
 
 const AdminDashboard = () => {
   const navigate = useNavigate();
   const [user, setUser] = useState(null);
+  const [equipment, setEquipment] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [users, setUsers] = useState([]);
+  const [pendingApprovals, setPendingApprovals] = useState([]);
+  const [requests, setRequests] = useState([]);
 
   useEffect(() => {
     const userData = getUser();
     if (userData && userData.role === 'Admin') {
       setUser(userData);
+      fetchEquipment();
+      fetchUsers();
+      fetchPendingRequests();
+      fetchAllRequests();
     } else {
       navigate('/dashboard');
     }
   }, [navigate]);
 
-  if (!user) return <div>Loading...</div>;
+  // Fetch all equipment
+    const fetchEquipment = async () => {
+      try {
+        setLoading(true);
+        const response = await equipmentAPI.getAll({ limit: 100 }); // Get all equipment
+        if (response.data.success) {
+          setEquipment(response.data.data);
+        }
+      } catch (err) {
+        console.error('Failed to fetch equipment:', err);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const stats = [
-    { label: 'Total Users', value: '182', icon: '', color: '#4CAF50' },
-    { label: 'Total Equipment', value: '45', icon: '', color: '#2196F3' },
-    { label: 'Active Requests', value: '12', icon: '', color: '#FF9800' },
-    { label: 'Pending Approvals', value: '5', icon: '', color: '#f44336' }
-  ];
+  const fetchUsers = async () => {
+      try {
+        setLoading(true);
+        const params = {}
+        
+        const response = await usersAPI.getAll(params);
+        if (response.data.success) {
+          setUsers(response.data.data);
+        }
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const fetchPendingRequests = async () => {
+      try {
+        setLoading(true);
+        const params = { status: "Pending" };
+  
+        const response = await requestsAPI.getAll(params);
+        if (response.data.success) {
+          // Filter to show only Student requests for Teachers
+          const allRequests = response.data.data || [];
+          setPendingApprovals(allRequests); // Show only first 4 on dashboard
+        } else {
+          setPendingApprovals([]);
+        }
+      } catch (error) {
+        console.error("Error fetching pending requests:", error);
+        setPendingApprovals([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  const fetchAllRequests = async () => {
+      try {
+        setLoading(true);
+        const params = {};
+        const response = await requestsAPI.getAll(params);
+          if (response.data.success) {
+            setRequests(response.data.data || []);
+          } else {
+            setRequests([]);
+          }
+        }
+       catch (error) {
+        console.error("Error fetching pending requests:", error);
+        setRequests([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+  if (!user) return <div>Loading...</div>;
 
   const quickActions = [
     {
@@ -47,20 +123,7 @@ const AdminDashboard = () => {
       icon: '',
       path: '/admin/all-requests',
       color: '#FF9800'
-    },
-    {
-      title: 'Reports & Analytics',
-      description: 'View system reports',
-      icon: '',
-      path: '/admin/reports',
-      color: '#9C27B0'
     }
-  ];
-
-  const recentActivity = [
-    { user: 'John Doe', action: 'Borrowed Laptop #23', time: '2 hours ago' },
-    { user: 'Jane Smith', action: 'Returned Projector #5', time: '4 hours ago' },
-    { user: 'Mike Johnson', action: 'Requested Camera #12', time: '5 hours ago' }
   ];
 
   return (
@@ -79,19 +142,39 @@ const AdminDashboard = () => {
         </div>
 
         {/* Statistics Cards */}
-        <div className="stats-grid">
-          {stats.map((stat, index) => (
-            <div key={index} className="stat-card" style={{ borderLeftColor: stat.color }}>
-              <div className="stat-icon" style={{ backgroundColor: stat.color + '20' }}>
-                <span>{stat.icon}</span>
+        {!loading && (
+          <div>
+            <div className="stats-grid">
+              <div className="stat-card" style={{ borderLeftColor: '#4CAF50' }}>
+                <div className="stat-content">
+                  <h3>Total Users</h3>
+                  <p>{users.length}</p>
+                </div>
               </div>
-              <div className="stat-content">
-                <h3>{stat.value}</h3>
-                <p>{stat.label}</p>
+
+              <div className="stat-card" style={{ borderLeftColor: '#2196f3' }}>
+                <div className="stat-content">
+                  <h3>{equipment.length}</h3>
+                  <p>Total Equipment</p>                  
+                </div>
+              </div>
+
+              <div className="stat-card" style={{ borderLeftColor: '#FF9800' }}>
+                <div className="stat-content">
+                  <h3>{requests.length}</h3>
+                  <p>Total Requests</p>         
+                </div>
+              </div>
+
+              <div className="stat-card" style={{ borderLeftColor: '#f44336' }}>
+                <div className="stat-content">
+                  <h3>{pendingApprovals.length}</h3>
+                  <p>Pending Approvals</p>
+                </div>
               </div>
             </div>
-          ))}
-        </div>
+          </div>
+        )}
 
         {/* Quick Actions */}
         <div className="section">
@@ -103,40 +186,12 @@ const AdminDashboard = () => {
                 className="action-card"
                 onClick={() => navigate(action.path)}
               >
-                <div className="action-icon" style={{ backgroundColor: action.color }}>
-                  {action.icon}
-                </div>
                 <h3>{action.title}</h3>
                 <p>{action.description}</p>
                 <button className="action-btn">Go →</button>
               </div>
             ))}
           </div>
-        </div>
-
-        {/* Recent Activity */}
-        <div className="section">
-          <h2>Recent Activity</h2>
-          <div className="activity-list">
-            {recentActivity.map((activity, index) => (
-              <div key={index} className="activity-item">
-                <div className="activity-avatar">
-                  {activity.user.charAt(0)}
-                </div>
-                <div className="activity-details">
-                  <p className="activity-user">{activity.user}</p>
-                  <p className="activity-action">{activity.action}</p>
-                </div>
-                <span className="activity-time">{activity.time}</span>
-              </div>
-            ))}
-          </div>
-          <button 
-            className="btn-secondary"
-            onClick={() => navigate('/admin/activity')}
-          >
-            View All Activity
-          </button>
         </div>
       </div>
     </div>
