@@ -32,7 +32,7 @@ info:
 
 servers:
   - url: https://school-equipment-landing-portal.vercel.app/api
-    description: Production development server
+    description: Production development server (Vercel Live)
   - url: https://localhost:5000/api
     description: Local server 
 
