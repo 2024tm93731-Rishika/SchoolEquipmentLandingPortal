@@ -24,9 +24,18 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({
-  origin: process.env.CORS_ORIGIN || 'http://localhost:3000',
-  credentials: true
+  origin: [
+    'http://localhost:3000',
+    'http://localhost:5000',
+    'https://2024tm93731-rishika.github.io',
+    'https://2024tm93731-rishika.github.io/SchoolEquipmentLandingPortal',
+    process.env.CORS_ORIGIN || '*'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
+
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -43,7 +52,7 @@ app.get('/', (req, res) => {
     success: true,
     message: 'School Equipment Lending Portal API',
     version: '1.0.0',
-    documentation: 'https://2024tm93731-rishika.github.io/school-equipment-lending-api-docs/'
+    documentation: 'https://2024tm93731-rishika.github.io/SchoolEquipmentLandingPortal/'
   });
 });
 
