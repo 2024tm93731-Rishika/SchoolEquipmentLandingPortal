@@ -199,8 +199,8 @@ const ManageEquipment = () => {
         }
       }
 
-      // Clear success message after 3 seconds
-      setTimeout(() => setSuccessMessage(''), 3000);
+      // Clear success message after 2.5 seconds
+      setTimeout(() => setSuccessMessage(''), 2500);
     } catch (err) {
       console.error('Error:', err);
       if (err.response && err.response.data) {
@@ -226,7 +226,7 @@ const ManageEquipment = () => {
         if (response.data.success) {
           setSuccessMessage('Equipment deleted successfully!');
           fetchEquipment(); // Refresh list
-          setTimeout(() => setSuccessMessage(''), 3000);
+          setTimeout(() => setSuccessMessage(''), 2500);
         }
       } catch (err) {
         if (err.response && err.response.data) {
@@ -269,10 +269,10 @@ const ManageEquipment = () => {
           </button>
         </div>
 
-        {/* Success Message */}
+        {/* Success Message Toast */}
         {successMessage && (
-          <div className="alert alert-success">
-             {successMessage}
+          <div className="success-toast">
+            {successMessage}
           </div>
         )}
 

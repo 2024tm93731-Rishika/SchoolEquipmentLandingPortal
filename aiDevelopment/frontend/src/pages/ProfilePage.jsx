@@ -93,13 +93,14 @@ const ProfilePage = () => {
       if (response.data.success) {
         setSuccessMessage('Password changed successfully!');
         setTimeout(() => {
+          setSuccessMessage('');
           setShowPasswordModal(false);
           setPasswordForm({
             currentPassword: '',
             newPassword: '',
             confirmPassword: ''
           });
-        }, 2000);
+        }, 2500);
       }
     } catch (err) {
       console.error('Error changing password:', err);
@@ -150,10 +151,10 @@ const ProfilePage = () => {
           </button>
         </div>
 
-        {/* Success Message */}
+        {/* Success Message Toast */}
         {successMessage && !showPasswordModal && (
-          <div className="alert alert-success">
-             {successMessage}
+          <div className="success-toast">
+            {successMessage}
           </div>
         )}
 
@@ -239,8 +240,8 @@ const ProfilePage = () => {
             )}
 
             {successMessage && (
-              <div className="alert alert-success">
-                 {successMessage}
+              <div className="success-toast">
+                {successMessage}
               </div>
             )}
 
