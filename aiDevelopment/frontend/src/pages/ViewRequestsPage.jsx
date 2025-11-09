@@ -4,6 +4,7 @@ import { requestsAPI } from '../services/api';
 import "./ViewRequestPage.css";
 import { getUser } from '../utils/auth';
 import { useNavigate } from 'react-router-dom';
+import CommonPopup from '../components/common/CommonPopup';
 
 const ViewRequests = () => {
   const navigate = useNavigate();
@@ -12,11 +13,23 @@ const ViewRequests = () => {
   const [requests, setRequests] = useState([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
+  const [cancelingId, setCancelingId] = useState(null);
+  const [popup, setPopup] = useState({ isOpen: false, message: '', type: 'info' });
   const pageSize = 15; // number of records per page
 
   useEffect(() => {
     fetchRequests();
   }, []);
+
+  // Adjust pagination if current page becomes invalid after cancellation
+  useEffect(() => {
+    const totalPages = Math.ceil(requests.length / pageSize);
+    if (currentPage > totalPages && totalPages > 0) {
+      setCurrentPage(totalPages);
+    } else if (totalPages === 0) {
+      setCurrentPage(1);
+    }
+  }, [requests.length, currentPage, pageSize]);
 
   const fetchRequests = async () => {
     try {
@@ -71,6 +84,43 @@ const ViewRequests = () => {
     }
   };
 
+  // Handle cancel request
+  const handleCancelRequest = async (requestId) => {
+    try {
+      setCancelingId(requestId);
+      const response = await requestsAPI.cancel(requestId);
+
+      if (response.data.success) {
+        // Remove the canceled request from the list
+        setRequests(prevRequests => prevRequests.filter(req => req.id !== requestId));
+        setPopup({
+          isOpen: true,
+          message: response.data.message || 'Request cancelled successfully',
+          type: 'success'
+        });
+      } else {
+        setPopup({
+          isOpen: true,
+          message: response.data.message || 'Failed to cancel request',
+          type: 'error'
+        });
+      }
+    } catch (error) {
+      console.error('Error cancelling request:', error);
+      setPopup({
+        isOpen: true,
+        message: error.response?.data?.message || 'Failed to cancel request. Please try again.',
+        type: 'error'
+      });
+    } finally {
+      setCancelingId(null);
+    }
+  };
+
+  const closePopup = () => {
+    setPopup({ isOpen: false, message: '', type: 'info' });
+  };
+
   return (
     <div className="view-requests-page">
       <Header />
@@ -102,6 +152,7 @@ const ViewRequests = () => {
                   <th>Requested Date</th>
                   <th>Purpose</th>
                   <th>Status</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -113,6 +164,17 @@ const ViewRequests = () => {
                     <td>{req.purpose || "-"}</td>
                     <td className={`status ${getStatusClass(req.status)}`}>
                       {req.status}
+                    </td>
+                    <td>
+                      {req.status && req.status.toLowerCase() === 'pending' && (
+                        <button
+                          className="btn-cancel"
+                          onClick={() => handleCancelRequest(req.id)}
+                          disabled={cancelingId === req.id}
+                        >
+                          {cancelingId === req.id ? 'Canceling...' : 'Cancel'}
+                        </button>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -150,6 +212,15 @@ const ViewRequests = () => {
           </button>
         </div>
       )}
+
+      {/* Success/Error Popup */}
+      <CommonPopup
+        isOpen={popup.isOpen}
+        message={popup.message}
+        type={popup.type}
+        onClose={closePopup}
+        buttonText="OK"
+      />
     </div>
   );
 };
