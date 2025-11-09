@@ -1,6 +1,10 @@
 const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
+const swaggerUi = require('swagger-ui-express');
+const YAML = require('yaml');
+const fs = require('fs');
+const path = require('path');
 
 // Import routes
 const authRoutes = require('./routes/authRoutes');
@@ -42,6 +46,28 @@ app.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ===== SWAGGER SETUP =====
+const swaggerFilePath = path.join(__dirname, 'docs', 'swagger.yaml');
+// OR if at root: path.join(__dirname, 'swagger.yaml')
+
+const swaggerDocument = YAML.parse(fs.readFileSync(swaggerFilePath, 'utf8'));
+
+app.use(
+  '/api-docs',
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerDocument, {
+    swaggerOptions: {
+      persistAuthorization: true,
+      docExpansion: 'list',
+      filter: true,
+      showRequestHeaders: true,
+    },
+    customCss: '.topbar { display: none }', // Optional
+    customSiteTitle: 'Equipment Portal API Docs',
+  })
+);
+
 
 // API Routes
 app.use('/api/auth', authRoutes);

@@ -76,7 +76,7 @@ const getUserById = async (req, res, next) => {
 const createUser = async (req, res, next) => {
   try {
     const { email, password, full_name, role, phone, department } = req.body;
-
+    
     // Check if email already exists
     const emailExists = await UserModel.emailExists(email);
     if (emailExists) {
@@ -110,9 +110,6 @@ const createUser = async (req, res, next) => {
 
     // Remove password_hash from response
     const { password_hash: _, setup_token, ...userWithoutPassword } = newUser;
-
-    // TODO: Send password setup email if no password provided
-    // This would be implemented in Phase 2 with email service
 
     res.status(201).json({
       success: true,
